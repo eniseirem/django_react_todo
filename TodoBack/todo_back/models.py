@@ -6,19 +6,24 @@ from django.contrib.auth import get_user_model
 
 # Create your models here.
 
+
 class TodoList(models.Model):
     title = models.CharField(max_length=120)
-    owner = models.ForeignKey(get_user_model(), null=True, default=1, on_delete=models.DO_NOTHING)
+    owner = models.ForeignKey(get_user_model(), default=1, on_delete=models.DO_NOTHING)
 
 class TodoItem (models.Model):
     list = models.ForeignKey(TodoList, on_delete=models.CASCADE)
-    name = models.CharField(max_length=120)
+    name = models.CharField(max_length=120, unique=True, db_column="name")
     desc = models.TextField()
     status = models.BooleanField(default=False)
     creation = models.DateTimeField(auto_now_add=True)
     deadline = models.DateTimeField()
-    dependency = models.CharField(max_length=120, default=None)
+    dependency = models.ForeignKey("TodoItem", to_field="id", null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
 
-    def clean(self):
-        if self.dependency is not None:
-            raise ValidationError(_('This item can not be deleted, depented on' + self.depent))
+
+    # def todo_done(self):
+    #     if self.dependency is not None:
+    #         #check status of dependent item
+    #         raise ValidationError(_('This item can not be deleted, depented on' + self.dependency))
+    #     else:
+    #         self.status = True
