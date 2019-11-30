@@ -4,8 +4,6 @@ from .serializers import TodoItemSerializer, TodoListSerializer
 from .models import TodoItem, TodoList
 from rest_framework.decorators import action
 from django.http import JsonResponse
-from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
 
 
 class TodoItemView(viewsets.ModelViewSet):
@@ -23,7 +21,7 @@ class TodoItemView(viewsets.ModelViewSet):
             parents = dep_todos.filter(status=False)
             #find dependent todos
             if parents.exists():
-                deps = parents.values()
+                deps = parents.values('name')
                 explanation = 'This item depented on other todos, make done them before this one.'
                 return JsonResponse({'explanation': explanation, 'todos': list(deps)}, status=401)
             else:
@@ -38,11 +36,17 @@ class TodoItemView(viewsets.ModelViewSet):
                 result='Undone'
             todo.save()
             res = 'You have changed this item status as ' + result
-            response = JsonResponse({'result' : res})
+            response = JsonResponse({'result': res})
             return response
 
 class TodoListView(viewsets.ModelViewSet):
     serializer_class = TodoListSerializer
     queryset = TodoList.objects.all()
+
+    @action(methods=['get'], detail=True)
+    def items(self, *args, **kwargs):
+        list_n= TodoList.objects.get(id=kwargs['pk'])
+        todos = TodoItem.objects.filter(list=kwargs['pk']).values()
+        return JsonResponse({'list_name' : list_n.title, 'todos' : list(todos)})
 
 

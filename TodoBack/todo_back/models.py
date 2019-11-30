@@ -10,6 +10,9 @@ class TodoList(models.Model):
     title = models.CharField(max_length=120)
     owner = models.ForeignKey(get_user_model(), default=1, on_delete=models.DO_NOTHING)
 
+    def __str__(self):
+        return '{}'.format(self.title)
+
 class TodoItem (models.Model):
     list = models.ForeignKey(TodoList, on_delete=models.CASCADE)
     name = models.CharField(max_length=120, unique=True, db_column="name")
