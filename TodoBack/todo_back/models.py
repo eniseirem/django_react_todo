@@ -1,6 +1,5 @@
 from django.db import models
-from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+
 from django.contrib.auth import get_user_model
 
 
@@ -20,10 +19,5 @@ class TodoItem (models.Model):
     deadline = models.DateTimeField()
     dependency = models.ForeignKey("TodoItem", to_field="id", null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
 
-
-    # def todo_done(self):
-    #     if self.dependency is not None:
-    #         #check status of dependent item
-    #         raise ValidationError(_('This item can not be deleted, depented on' + self.dependency))
-    #     else:
-    #         self.status = True
+    def __str__(self):
+        return self.name

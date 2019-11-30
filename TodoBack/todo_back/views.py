@@ -4,32 +4,45 @@ from .serializers import TodoItemSerializer, TodoListSerializer
 from .models import TodoItem, TodoList
 from rest_framework.decorators import action
 from django.http import JsonResponse
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
 
 class TodoItemView(viewsets.ModelViewSet):
     serializer_class = TodoItemSerializer
     queryset = TodoItem.objects.all()
-
     @action(methods=['get'], detail=True)
     def done(self, *args, **kwargs):
         todo = TodoItem.objects.get(id=kwargs['pk'])
-        if todo.status==False:
-            todo.status=True
-            result='Done'
+        #check if any dependent todo exist
+        dep_todos = TodoItem.objects.filter(dependency=kwargs['pk'])
+        shouldUpdate = False
+        if dep_todos.exists() == False:
+            shouldUpdate = True
         else:
-            todo.status=False
-            result='Undone'
-        todo.save()
-        res = 'You have changed this item status as ' + result
-        response = JsonResponse({'result' : res})
-        return response
-
+            parents = dep_todos.filter(status=False)
+            #find dependent todos
+            if parents.exists():
+                deps = parents.values()
+                explanation = 'This item depented on other todos, make done them before this one.'
+                return JsonResponse({'explanation': explanation, 'todos': list(deps)}, status=401)
+            else:
+                shouldUpdate = True
+        #change its status
+        if(shouldUpdate):
+            if todo.status==False:
+                todo.status=True
+                result='Done'
+            else:
+                todo.status=False
+                result='Undone'
+            todo.save()
+            res = 'You have changed this item status as ' + result
+            response = JsonResponse({'result' : res})
+            return response
 
 class TodoListView(viewsets.ModelViewSet):
     serializer_class = TodoListSerializer
     queryset = TodoList.objects.all()
 
-
-
-# class showitem(viewsets.ModelViewSet):
 
