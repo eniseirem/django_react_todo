@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 'todo_back.apps.TodoBackConfig',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
 
     'todo_back',
@@ -131,4 +132,8 @@ STATIC_URL = '/static/'
 #for frontend
 CORS_ORIGIN_WHITELIST=['https://localhost:3000']
 
-#nor working
+REST_FRAMEWORK = {
+  'DEFAULT_AUTHENTICATION_CLASSES': (
+      'rest_framework.authentication.TokenAuthentication',
+    )
+}
