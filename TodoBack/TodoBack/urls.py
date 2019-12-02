@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from todo_back import views
+from django.contrib.auth import authenticate
 
 router = routers.DefaultRouter()
 router.register('todolist', views.TodoListView)
@@ -24,5 +25,6 @@ router.register('todo', views.TodoItemView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls))
+    path('api/', include(router.urls)),
+    path('api/', include('accounts.urls'))
 ]
